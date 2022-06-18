@@ -3,6 +3,7 @@
 Books
 @endsection
 @section('content')
+<button class="btn btn-success offset-5 mt-3"><a href="{{route('books.create')}}" class="text-decoration-none text-white">Create</a></button>
 <h1>All Books</h1>
 @foreach($books as $book)
 
