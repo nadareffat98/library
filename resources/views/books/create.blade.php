@@ -5,6 +5,7 @@ CreateBook
 @section('content')
 
 @include('inc.errors')
+
 <form method="POST" action="{{route('books.store')}}" enctype="multipart/form-data">
 
     @csrf

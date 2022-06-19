@@ -3,7 +3,9 @@
 Categories
 @endsection
 @section('content')
+@auth
 <button class="btn btn-success offset-5 mt-3"><a href="{{route('categories.create')}}" class="text-decoration-none text-white">Create</a></button>
+@endauth
 <h1>All Categories</h1>
 @foreach($categories as $category)
 
