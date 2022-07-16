@@ -20,6 +20,16 @@ EditBook - {{$book->title}}
         <label for="file" class="form-label">Upload Image</label>
         <input class="form-control form-control-sm" id="file" type="file" name="img">
     </div>
+    Select Categories :
+    @foreach($categories as $category)
+    <div class="form-check mx-5">
+        <input class="form-check-input" type="checkbox" value="{{$category->id}}" name="category_ids[]" id="flexCheckDefault" @foreach($book->categories as $bookCat) {{$category->id==$bookCat->id ? 'checked':''}} @endforeach>
+        <label class="form-check-label" for="flexCheckDefault">
+            {{$category->name}}
+        </label>
+    </div>
+    @endforeach
+    <br>
     <button type="submit" class="btn btn-primary">Update</button>
 </form>
 @endsection

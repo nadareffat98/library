@@ -4,6 +4,8 @@ use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\NoteController;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,12 +44,16 @@ Route::middleware('isLogin')->group(function () {
 
     //logout
     Route::get('/logout', [AuthController::class, 'logout'])->name('auth.logout');
+
+    //Note:create
+    Route::get('/notes/create', [NoteController::class, 'create'])->name('notes.create');
+    Route::post('/notes/store', [NoteController::class, 'store'])->name('notes.store');
 });
 Route::middleware('isLoginAdmin')->group(function (){
 
     //Book:delete
     Route::get('/books/delete/{id}', [BookController::class, 'delete'])->name('books.delete');
-    
+
     //Category:delete
     Route::get('/categories/delete/{id}', [CategoryController::class, 'delete'])->name('categories.delete');
 
@@ -74,3 +80,7 @@ Route::get('/books/show/{id}', [BookController::class, 'show'])->name('books.sho
 //Category:read
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 Route::get('/categories/show/{id}', [CategoryController::class, 'show'])->name('categories.show');
+
+
+Route::get('login/github',[AuthController::class,'redirectToProvider'])->name('auth.github.redirect');
+Route::get('login/github/callback',[AuthController::class,'handleProviderCallback'])->name('auth.github.callback');

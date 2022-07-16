@@ -3,36 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Models\Book;
-use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
-class BookController extends Controller
+class ApiBookController extends Controller
 {
-    public  function index()
+    public function index()
     {
-        // $books = Book::get(); == Book::all()
-        // $books = Book::select('title','desc')->get(); custom columns
-        // $books = Book::where('id','>=',2)->get(); where condition
-        // $books = Book::select('title','desc')->where('id','>=',2)->get(); 
-        $books = Book::paginate(2);
-        return view('books.index',compact('books'));
-        
+        $books = Book::get();
+        return response()->json($books);
     }
 
     public function show($id)
     {
-        // $book = Book::find($id);
-        $book = Book::findOrFail($id);
-        return view('books.show',compact('book'));
+        $book = Book::with('categories')->findOrFail($id);
+        return response()->json($book);
     }
 
-    //create:function
-    public function create()
-    {
-        $categories = Category::select('id','name')->get();
-        return view('books.create',compact('categories'));
-    }
-    
     public function store(Request $req)
     {
         //validation
@@ -48,34 +35,30 @@ class BookController extends Controller
         $extension = $img->getClientOriginalExtension();
         $name = "book-" . uniqid() . ".$extension";
         $img->move(public_path('uploads/books'),$name);
-        $title= $req->title;
-        $desc= $req->desc;
         $book= Book::create([
-            'title'=> $title,
-            'desc' => $desc,
+            'title'=>  $req->title,
+            'desc' =>  $req->desc,
             'img'=> $name
         ]);
         $book->categories()->sync($req->category_ids);
-        return redirect(route('books.index'));
+        return response()->json('Book Created Successfully');
     }
 
-    //edit:function
-    public function edit($id)
-    {
-        $book = Book::with('categories')->findOrFail($id);
-        $categories = Category::select('id','name')->get();
-        return view('books.edit',compact('book','categories'));
-    }
     public function update(Request $req,$id)
     {
         //validation
-        $req->validate([
+        $validator = validator::make($req->all(),[
             'title'=>'required|string|max:100',
             'desc'=>'required|string',
             'img'=>'nullable|image|mimes:jpg,png',
             'category_ids'=>'required',
             'category_ids.*'=>'exists:categories,id'
         ]);
+        if($validator->fails())
+        {
+            $errors = $validator->errors();
+            return response()->json($errors);
+        };
         $book = Book::findOrFail($id) ;
         $name = $book->img;
         if($req->hasFile('img'))
@@ -96,10 +79,9 @@ class BookController extends Controller
             'img'=>$name
         ]);
         $book->categories()->sync($req->category_ids);
-        return redirect(route('books.show',$id));
+        return response()->json('Book Updated Successfully');
     }
 
-    //delete:function
     public function delete($id)
     {
         $book = Book::findOrFail($id);
@@ -107,7 +89,10 @@ class BookController extends Controller
         {
             unlink(public_path('uploads/books/').$book->img);
         }
+        //delete book from book_category table first 
+        $book->categories()->sync([]);
         $book->delete();
-        return redirect(route('books.index'));
+        return response()->json('Book Deleted Successfully');
     }
+
 }
